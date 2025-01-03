@@ -29,28 +29,28 @@ class JeTransformer(Transformer):
         return res
 
     def sharp(self, items):
-        return self.op(items, 'sharp')
+        return self.op(items, "sharp")
 
     def flat(self, items):
-        return self.op(items, 'flat')
+        return self.op(items, "flat")
 
     def oct_higher(self, items):
-        return self.op(items, 'oct_up')
+        return self.op(items, "oct_up")
 
     def oct_lower(self, items):
-        return self.op(items, 'oct_down')
+        return self.op(items, "oct_down")
 
     def section(self, items):
-        return NoteSection(self.op(items, ''))
+        return NoteSection(self.op(items, ""))
 
     def line(self, items):
-        return NoteLine(self.op(items, ''))
+        return NoteLine(self.op(items, ""))
 
     def chapter(self, items):
-        return NoteChapter(self.op(items, ''))
+        return NoteChapter(self.op(items, ""))
 
     def sheet(self, items):
-        return Sheet(self.op(items, ''))
+        return Sheet(self.op(items, ""))
 
     @staticmethod
     def flatten(items):
@@ -65,13 +65,17 @@ class JeTransformer(Transformer):
 
     def part_extened_oct_section(self, items):
         flat_items = self.flatten(items)
-        if len(flat_items) == 2 and all(isinstance(item, NoteLine) for item in flat_items):
+        if len(flat_items) == 2 and all(
+            isinstance(item, NoteLine) for item in flat_items
+        ):
             return NoteLine(
                 [
                     *flat_items[0].sections[:-1],
                     NoteSection(
-                        flat_items[0].sections[-1].notes + flat_items[1].sections[0].notes),
-                    *flat_items[1].sections[1:]
+                        flat_items[0].sections[-1].notes
+                        + flat_items[1].sections[0].notes
+                    ),
+                    *flat_items[1].sections[1:],
                 ]
             )
 
@@ -80,10 +84,10 @@ class JeTransformer(Transformer):
                 index = i
                 break
         else:
-            raise Exception('未找到 NoteLine')
+            raise Exception("未找到 NoteLine")
 
         left_notes = flat_items[:index]
-        right_notes = flat_items[index+1:]
+        right_notes = flat_items[index + 1 :]
 
         line: NoteLine = flat_items[index]
         line.sections[0] = NoteSection(left_notes + line.sections[0].notes)

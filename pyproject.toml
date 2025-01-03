@@ -16,3 +16,6 @@ build-backend = "pdm.backend"
 
 [project.scripts]
 jef = "parse:main"
+
+[tool.pdm]
+distribution = true
