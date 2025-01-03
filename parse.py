@@ -1,19 +1,34 @@
+from typing import IO
 from lark import Lark
 from pathlib import Path
 import sys
-from transform import JeTransformer, Format
+from JeFormatter import JeTransformer, JeFormatter
+import click
+import re
 
-l = Lark(Path('je.lark').read_text(), start='sheet')
-text = Path(sys.argv[1]).read_text().strip()
-text = '\n'.join([line.strip() for line in text.splitlines()])
-res = l.parse(text)
-Path('out.txt').write_text(str(res.pretty()))
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-# print(list(res.find_data('num_note')))
 
-tres = JeTransformer().transform(res)
-print(tres)
-format = Format(tres)
-format.analyse_sheet()
-format.output()
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('input_file', type=click.File('r', encoding='utf-8'), default=sys.stdin)
+@click.argument('output', type=click.File('w', encoding='utf-8'), default=sys.stdout)
+@click.option('-o', '--offset', type=int, default=0, help='整体音高偏移，以半音为单位，例如 12 表示整体上升一个八度')
+def main(input_file: IO, output: IO, offset: int):
+    lark = Lark(
+        (Path(__file__).parent / 'je.lark').read_text(encoding='utf-8'), start='sheet')
 
+    input_str = input_file.read()
+    input_str = re.sub(
+        r'[^1-7#b\(\)\[\]（）【】♯♭\n\t\r\xa0 ]+', ' ', input_str).strip()
+    input_str = '\n'.join([line.strip() for line in input_str.splitlines()])
+
+    res = lark.parse(input_str)
+    Path('.debuginfo').write_text(str(res.pretty()))
+
+    tres = JeTransformer.set_offset(offset)().transform(res)
+    format = JeFormatter(tres)
+    format.analyse()
+    output.write(format.output_sheet())
+
+
+main()

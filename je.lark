@@ -1,26 +1,36 @@
-sheet : chapter (_LINE_SPLIT _LINE_SPLIT+ chapter)*
-chapter : line (_LINE_SPLIT line)*
-line : section (_SPACE+ section)*
+sheet : (chapter|oct_higher_chapter|oct_lower_chapter) (_LINE_SPLIT _LINE_SPLIT+ (chapter|oct_higher_chapter|oct_lower_chapter))*
+chapter : (line|oct_higher_line|oct_lower_line) (_LINE_SPLIT (line|oct_higher_line|oct_lower_line))*
+line : (section|oct_higher_section|oct_lower_section) (_SPACE+ (section|oct_higher_section|oct_lower_section))*
 section : (_part)+
 
 num_note : NUM_NOTE
-_part : sharp | flat | oct_higher | oct_lower | num_note
+_part : sharp | flat | oct_higher_part | oct_lower_part | num_note
 sharp : _SHARP_SYMBOL _SPACE* _part
 flat : _FLAT_SYMBOL _SPACE* _part
-oct_higher : _OCT_HIGHER_L (_SPACE* _part)+ _SPACE* _OCT_HIGHER_R
-oct_lower : _OCT_LOWER_L (_SPACE* _part)+ _SPACE* _OCT_LOWER_R
+
+oct_higher_part : _OCT_HIGHER_L _part+ _OCT_HIGHER_R -> oct_higher
+oct_higher_section : _OCT_HIGHER_L section+ _OCT_HIGHER_R -> oct_higher
+oct_higher_line : _OCT_HIGHER_L line+ _OCT_HIGHER_R -> oct_higher
+oct_higher_chapter : _OCT_HIGHER_L chapter+ _OCT_HIGHER_R -> oct_higher
+
+oct_lower_part : _OCT_LOWER_L _part+ _OCT_LOWER_R -> oct_lower
+oct_lower_section : _OCT_LOWER_L section+ _OCT_LOWER_R -> oct_lower
+oct_lower_line : _OCT_LOWER_L line+ _OCT_LOWER_R -> oct_lower
+oct_lower_chapter : _OCT_LOWER_L chapter+ _OCT_LOWER_R -> oct_lower
 
 NUM_NOTE : /[1-7]/
-_SHARP_SYMBOL : "#"
-_FLAT_SYMBOL : "b"
-_OCT_HIGHER_L : "["
-_OCT_HIGHER_R : "]"
-_OCT_LOWER_L : "("
-_OCT_LOWER_R : ")"
+_SHARP_SYMBOL : "#"|"♯"
+_FLAT_SYMBOL  : "b"|"♭"
+_OCT_HIGHER_L : "["|"【"
+_OCT_HIGHER_R : "]"|"】"
+_OCT_LOWER_L  : "("|"（"
+_OCT_LOWER_R  : ")"|"）"
 
 _LINE_SPLIT: "\n"
 _SPACE: /[ \t]/
+// _SPACE.-1: /.+?/
 
-%ignore /[\t\f\r]/
-%ignore /\[ *\]/
-%ignore /\( *\)/
+// %ignore /[^1-7#b\(\)\[\]（）【】♯♭\n\t\r\xa0 ]+/
+%ignore /[\t\f\r\xa0]/
+%ignore /\[[ \t\r\n\xa0]*\]/
+%ignore /\([ \t\r\n\xa0]*\)/

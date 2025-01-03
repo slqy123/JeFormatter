@@ -1,3 +1,14 @@
 .idea
 __pycache__
 .vscode
+.pdm-python
+.debuginfo
+.python-version
+kotonai.txt
+out_sheet.txt
+out.txt
+pdm.lock
+requirements.lock
+sheet.txt
+testin.txt
+sheet.txt

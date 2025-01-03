@@ -1,0 +1,18 @@
+
+[project]
+name = "JeFormatter"
+version = "0.1.0"
+description = "JE谱格式化工具"
+authors = [{ name = "Quy", email = "sqiyel@gmail.com" }]
+dependencies = ["lark>=1.1.7", "click>=8.1.6"]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project.scripts]
+jef = "parse:main"
