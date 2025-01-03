@@ -1,0 +1,26 @@
+sheet : chapter (_LINE_SPLIT _LINE_SPLIT+ chapter)*
+chapter : line (_LINE_SPLIT line)*
+line : section (_SPACE+ section)*
+section : (_part)+
+
+num_note : NUM_NOTE
+_part : sharp | flat | oct_higher | oct_lower | num_note
+sharp : _SHARP_SYMBOL _SPACE* _part
+flat : _FLAT_SYMBOL _SPACE* _part
+oct_higher : _OCT_HIGHER_L (_SPACE* _part)+ _SPACE* _OCT_HIGHER_R
+oct_lower : _OCT_LOWER_L (_SPACE* _part)+ _SPACE* _OCT_LOWER_R
+
+NUM_NOTE : /[1-7]/
+_SHARP_SYMBOL : "#"
+_FLAT_SYMBOL : "b"
+_OCT_HIGHER_L : "["
+_OCT_HIGHER_R : "]"
+_OCT_LOWER_L : "("
+_OCT_LOWER_R : ")"
+
+_LINE_SPLIT: "\n"
+_SPACE: /[ \t]/
+
+%ignore /[\t\f\r]/
+%ignore /\[ *\]/
+%ignore /\( *\)/
