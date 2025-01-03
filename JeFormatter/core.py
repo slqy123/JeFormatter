@@ -20,11 +20,22 @@ class NotesInfo:
 # 跨行的升降八度
 class Operation:
     sep = ''
+    sub_type: Any
 
-    def __init__(self) -> None:
+    def __init__(self, items: List['Operation']) -> None:
         self.use_csharp = False
         self.can_output_mark = True
         self.with_oct = 0
+
+        for item in items:
+            if isinstance(item, self.__class__):
+                self.sub_items.extend(item.sub_items)
+                continue
+            if isinstance(item, self.sub_type):  # type: ignore
+                self.sub_items.append(item)
+                continue
+
+            print('unknow token', item, item.__dict__, type(item))
 
     @property
     def sub_items(self) -> List['Operation']:
@@ -213,24 +224,14 @@ class Note:
 
 class NoteSection(Operation):
     sep = ''
+    sub_type = Note
 
-    def __init__(self, tokens: List[Union[Note, 'NoteSection']]) -> None:
-        self.notes: List[Note] = []
-        for token in tokens:
-            if isinstance(token, Note):
-                self.notes.append(token)
-                continue
-
-            if isinstance(token, self.__class__):
-                self.notes.extend(token.notes)
-                continue
-
-            print('unknow token', token, token.__dict__, type(token))
-            raise
-        super().__init__()
+    def __init__(self, notes: List[Any]):
+        self.notes = []
+        super().__init__(notes)
 
     def analyse_csharp(self):
-        if self.info.markers_count['sharp'] == len(self.info.notes):
+        if self.info.markers_count['sharp'] == len(self.info.notes) > 1:
             self.set_csharp()
 
     def analyse_oct(self):
@@ -276,11 +277,12 @@ class NoteSection(Operation):
 
 
 class NoteLine(Operation):
-    sep = ' '
+    sep = '  '
+    sub_type = NoteSection
 
-    def __init__(self, sections: List[NoteSection]) -> None:
-        self.sections = sections
-        super().__init__()
+    def __init__(self, sections: List[Any]) -> None:
+        self.sections = []
+        super().__init__(sections)
 
     @property
     def sub_items(self):
@@ -289,10 +291,11 @@ class NoteLine(Operation):
 
 class NoteChapter(Operation):
     sep = '\n'
+    sub_type = NoteLine
 
-    def __init__(self, lines: List[NoteLine]) -> None:
-        self.lines = lines
-        super().__init__()
+    def __init__(self, lines: List[Any]) -> None:
+        self.lines = []
+        super().__init__(lines)
 
     def analyse_csharp(self):
         info = self.info
@@ -314,10 +317,11 @@ class NoteChapter(Operation):
 
 class Sheet(Operation):
     sep = '\n\n'
+    sub_type = NoteChapter
 
-    def __init__(self, chapters: List[NoteChapter]) -> None:
-        self.chapters = chapters
-        super().__init__()
+    def __init__(self, chapters: List[Any]) -> None:
+        self.chapters = []
+        super().__init__(chapters)
 
     @property
     def sub_items(self):
